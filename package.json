@@ -4,7 +4,8 @@
   "description": "Collecting information about sellers on the basis of an auction and krs",
   "main": "webpack.config.js",
   "dependencies": {
-    "axios": "^0.18.0"
+    "axios": "^0.18.0",
+    "underscore": "^1.8.3"
   },
   "devDependencies": {
     "babel-core": "^6.17.0",

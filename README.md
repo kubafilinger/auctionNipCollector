@@ -16,6 +16,11 @@ https://allegro.pl/listing?string=iphone%20apple&p=2&offerTypeBuyNow=1&vat_invoi
 ###Za pomocą konsoli chrome generujemy JSON z lista produktów: 
 `JSON.stringify(window.__listing_ItemsStoreState)`
 
+###Wystarczy ustawic nagłowek 
+`Accept: application/vnd.opbox-web.v2+json`
+
+i mamy juz objekt json
+
 Wynik zapisujemy bo potem bedziemy na nim operować w celu pozyskania ID sprzedawcy
 
 

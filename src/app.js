@@ -10,11 +10,42 @@
 //Bazadanych
 //TODO: zaprojektowac schemat tabeli bazy danych
 
-import { axios } from "axios";
+var axios = require('axios');
+var _ = require('underscore');
 
-axios.get('')
+axios
+    .get('https://allegro.pl/listing?string=iphone&p=2', {
+        headers: { 'Accept': 'application/vnd.opbox-web.v2+json' }
+    })
     .then(function (response) {
+        let allItems = response.data.dataSources['listing-api-v3:allegro.listing:3.0'].data.items;
+        let sponsoredItems = allItems.sponsored;
+        let promotedItems = allItems.promoted;
 
+        _.each(promotedItems, function (item) {
+            //TODO: sprawdzenie tytulu pod katem slow kluczowych?
+
+            if(item.seller.company) {
+                let sellerID = item.seller.id;
+
+                //TODO
+
+                axios
+                    .get('http://allegro.pl/company_icon_get_data_ajax.php?user=' + sellerID)
+                    .then(response => {
+                        console.log(response.data);
+
+                        //TODO: wyłuskać NIP
+
+                        response.data.getElementsByTagName('p');
+
+                        _.each(p, function(elem) {
+                            console.log(elem);
+                        });
+                    })
+                ;
+            }
+        })
     })
     .catch(function (e) {
 
