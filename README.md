@@ -38,4 +38,8 @@ http://www.krs-online.com.pl/?p=25&lookn=5540090995
 
 Trzeba wyszukac wszystkie linki w div zaraz pod form w div id="main"
 
-###Po wyswietleniu zawartości łącza możemy przejść do wyłuskiwania danych KRS
+
+##Dane z API mojepanstwo.pl
+https://api-v3.mojepanstwo.pl/dane/krs_podmioty.json?conditions[krs_podmioty.nip]=5540090995
+
+dostajemy zwrotnie JSONa z danymi tej firmy, ktore zapisujemy do bazdy danych
