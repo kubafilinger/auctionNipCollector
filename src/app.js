@@ -20,9 +20,9 @@ con.connect(function(err) {
 
 let keywords = config.keywords;
 
-_.each(keywords, (key) => {
+// _.each(keywords, (key) => {
     for (let pageNumber = 1; pageNumber < 2; pageNumber++) {
-        Allegro.getProducts(key, pageNumber)
+        Allegro.getProducts('iphone', pageNumber)
             .then(function (response) {
                 let countItems = response.data.dataSources['listing-api-v3:allegro.listing:3.0'].metadata.Pageable.totalCount;
                 let pageSize = response.data.dataSources['listing-api-v3:allegro.listing:3.0'].metadata.Pageable.pageSize;
@@ -106,4 +106,4 @@ _.each(keywords, (key) => {
             })
         ;
     }
-});
+// });

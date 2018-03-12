@@ -63,7 +63,7 @@ class Seller {
         return new Promise((resolve, reject) => {
             mysqlConnection.query(sql, function (err, result) {
                 if (err) reject(err);
-                console.log(result.insertId);
+
                 resolve(result);
             });
         });

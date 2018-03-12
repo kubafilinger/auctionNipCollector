@@ -34,7 +34,7 @@ con.connect(function(err) {
 
     let product = "CREATE TABLE IF NOT EXISTS `product` (" +
             "id INT NOT NULL AUTO_INCREMENT," +
-            "product_id INT NULL DEFAULT NULL," +
+            "product_id BIGINT NULL DEFAULT NULL," +
             "seller_id INT NULL DEFAULT NULL," +
             "images TEXT NULL DEFAULT NULL," +
             "url TEXT NULL DEFAULT NULL," +
