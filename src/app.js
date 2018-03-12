@@ -1,21 +1,11 @@
-// Collector
-//TODO: OK pobrac zawartosc wyszukiwarki na allegro i dostac sie do zmiennej window.costam z JSONem
-//TODO: OK wyszukac w jsonie numery ID sprzedawcow
-//TODO: OK Po id sprzedawcy odwolac sie do kolejnego url ktorym pobieramy dane sprzedawcy
-//TODO: OK Znalezć numer NIP i odpowiednio obrobic (do postaci samych liczb)
-//TODO: OK Pobrac zawartosc KRS z odpowiedniego URL (z zawartym nip) i odnalesc link do info o nipie
-//TODO: Po pobraniu storny pod tym linkiem, wyszukanie najwazniejszych info (daty i etc)
-//TODO: Zapisanie wszystkoego do bazy danych
-
-//Bazadanych
-//TODO: zaprojektowac schemat tabeli bazy danych
-
-var axios = require('axios');
 var _ = require('underscore');
 var mysql = require('mysql');
 var config = require('./config.js');
 var MYSQL = config.MYSQL;
 var Allegro = require('./libs/allegro');
+var Mojepanstwo = require('./libs/mojepanstwo');
+var Seller = require('./obj/Seller');
+var Product = require('./obj/Product');
 
 var con = mysql.createConnection({
     host: MYSQL.host,
@@ -32,51 +22,73 @@ let keywords = config.keywords;
 
 _.each(keywords, (key) => {
     for (let pageNumber = 1; pageNumber < 2; pageNumber++) {
-        Allegro.getProducts(key, pageNumber).then(function (response) {
+        Allegro.getProducts(key, pageNumber)
+            .then(function (response) {
                 let countItems = response.data.dataSources['listing-api-v3:allegro.listing:3.0'].metadata.Pageable.totalCount;
                 let pageSize = response.data.dataSources['listing-api-v3:allegro.listing:3.0'].metadata.Pageable.pageSize;
                 const numOfPages = Math.ceil(countItems / pageSize);
 
                 //TODO: wykozystac info o ilosci stron
 
-                if(response.status != 200) {
-                    pageNumber = 1000;
-                    return;
-                }
-
                 let allItems = response.data.dataSources['listing-api-v3:allegro.listing:3.0'].data.items;
                 let sponsoredItems = allItems.sponsored;
                 let promotedItems = allItems.promoted;
+                let regularItems = allItems.regular;
 
                 _.each(promotedItems, function (item) {
-                    //TODO: sprawdzenie tytulu pod katem slow kluczowych?
-
                     if (item.seller.company) {
                         let sellerID = item.seller.id;
 
                         Allegro.getSellerInfo(sellerID)
                             .then(response => {
-                                let html = response.data;
-                                let regexp = /<p>NIP:\s*([0-9\-]*)\s*<\/p>/i;
+                                let nip = Allegro.findNip(response.data);
 
-                                let find = html.match(regexp);
-
-                                if (find !== undefined) {
-                                    let nip = find[1].split('-').join('');
-
-                                    axios
-                                        .get('https://api-v3.mojepanstwo.pl/dane/krs_podmioty.json?conditions[krs_podmioty.nip]=' + nip)
+                                if(nip) {
+                                    Mojepanstwo.getCompanyData(nip)
                                         .then((response) => {
                                             if (response.data.Dataobject.length) {
                                                 let krs_podmioty = response.data.Dataobject[0].data;
-console.log(nip);
-                                                //TODO: sprawdzic czy wszystkie pola ktore chce pobrac sa
-                                                //TODO: zgrac do bazy danych, jesli juz nie istenije ziomeczek o tym NIP
+                                                let seller = new Seller;
+
+                                                seller.address = krs_podmioty['krs_podmioty.adres'];
+                                                seller.registrationDate = krs_podmioty['krs_podmioty.data_rejestracji'];
+                                                seller.checkDate = krs_podmioty['krs_podmioty.data_sprawdzenia'];
+                                                seller.email = krs_podmioty['krs_podmioty.email'];
+                                                seller.krs = krs_podmioty['krs_podmioty.krs'];
+                                                seller.nip = krs_podmioty['krs_podmioty.nip'];
+                                                seller.regon = krs_podmioty['krs_podmioty.regon'];
+                                                seller.www = krs_podmioty['krs_podmioty.www'];
+                                                seller.mojepanstwoUrl = response.data.Dataobject[0].url;
+                                                seller.allegroUsername = 'allegro_username';
+
+                                                seller.save(con)
+                                                    .then((result) => {
+                                                        console.log('save seller');
+
+                                                        let product = new Product;
+
+                                                        product.productId = item.id;
+                                                        product.sellerId = result.insertId;
+                                                        product.images = JSON.stringify(item.images);
+                                                        product.url = item.url;
+                                                        product.name = item.name;
+
+                                                        product.save(con)
+                                                            .then((result) => {
+                                                                console.log('save product');
+                                                            })
+                                                            .catch((err) => {
+                                                                console.log(err);
+                                                            })
+                                                    })
+                                                    .catch((err) => {
+                                                        console.log(err);
+                                                    })
                                             }
                                         })
                                         .catch((err) => {
                                             console.log('Error in get data from KRS');
-                                            //console.log(err);
+                                            console.log(err);
                                         })
                                 }
                             })
