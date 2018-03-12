@@ -15,6 +15,7 @@ var _ = require('underscore');
 var mysql = require('mysql');
 var config = require('./config.js');
 var MYSQL = config.MYSQL;
+var Allegro = require('./libs/allegro');
 
 var con = mysql.createConnection({
     host: MYSQL.host,
@@ -27,15 +28,11 @@ con.connect(function(err) {
     if (err) throw err;
 });
 
-let keywords = ['Vat%20marża','Vat%200','Vat%20ze%20stawką%200','faktura%20lub%20paragon%20VAT%20marża','bez%20simlocka','z%20folią%20na%20wyświetlaczu','fabrycznie%20zapakowany','instrukcja%20w%20języku%20angielskim'];
+let keywords = config.keywords;
 
 _.each(keywords, (key) => {
-    for (let pageNumber = 1; pageNumber < 1000; pageNumber++) {
-        axios
-            .get('https://allegro.pl/kategoria/telefony-i-akcesoria?offerTypeBuyNow=1&vat_invoice=1&string=' + key + '&p=' + pageNumber, {
-                headers: {'Accept': 'application/vnd.opbox-web.v2+json'}
-            })
-            .then(function (response) {
+    for (let pageNumber = 1; pageNumber < 2; pageNumber++) {
+        Allegro.getProducts(key, pageNumber).then(function (response) {
                 let countItems = response.data.dataSources['listing-api-v3:allegro.listing:3.0'].metadata.Pageable.totalCount;
                 let pageSize = response.data.dataSources['listing-api-v3:allegro.listing:3.0'].metadata.Pageable.pageSize;
                 const numOfPages = Math.ceil(countItems / pageSize);
@@ -57,8 +54,7 @@ _.each(keywords, (key) => {
                     if (item.seller.company) {
                         let sellerID = item.seller.id;
 
-                        axios
-                            .get('http://allegro.pl/company_icon_get_data_ajax.php?user=' + sellerID)
+                        Allegro.getSellerInfo(sellerID)
                             .then(response => {
                                 let html = response.data;
                                 let regexp = /<p>NIP:\s*([0-9\-]*)\s*<\/p>/i;
@@ -80,13 +76,13 @@ console.log(nip);
                                         })
                                         .catch((err) => {
                                             console.log('Error in get data from KRS');
-                                            console.log(err);
+                                            //console.log(err);
                                         })
                                 }
                             })
                             .catch((e) => {
                                 console.log('Error in get data seller from allegro');
-                                console.log(e);
+                                //console.log(e);
                             })
                         ;
                     }
@@ -94,7 +90,7 @@ console.log(nip);
             })
             .catch((e) => {
                 console.log('Error in get listing of products');
-                console.log(e);
+                //console.log(e);
             })
         ;
     }
