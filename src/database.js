@@ -12,7 +12,7 @@ con.connect(function(err) {
     if (err) throw err;
     console.log("Connected!");
 
-    let sql = "CREATE TABLE IF NOT EXISTS `seller` (" +
+    let seller = "CREATE TABLE IF NOT EXISTS `seller` (" +
             "id INT NOT NULL AUTO_INCREMENT," +
             "address VARCHAR(255) NULL DEFAULT NULL," +
             "registration_date DATETIME NULL DEFAULT NULL," +
@@ -31,7 +31,24 @@ con.connect(function(err) {
             "PRIMARY KEY (`id`)" +
         ");"
     ;
-    con.query(sql, function (err, result) {
+
+    let product = "CREATE TABLE IF NOT EXISTS `product` (" +
+            "id INT NOT NULL AUTO_INCREMENT," +
+            "product_id INT NULL DEFAULT NULL," +
+            "seller_id INT NULL DEFAULT NULL," +
+            "images TEXT NULL DEFAULT NULL," +
+            "url TEXT NULL DEFAULT NULL," +
+            "name TEXT NULL DEFAULT NULL," +
+            "PRIMARY KEY (`id`)" +
+        ");"
+    ;
+
+    con.query(seller, function (err, result) {
+        if (err) throw err;
+        console.log("Table created");
+    });
+
+    con.query(product, function (err, result) {
         if (err) throw err;
         console.log("Table created");
     });
