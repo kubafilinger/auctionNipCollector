@@ -1,22 +1,9 @@
 var _ = require('underscore');
-var mysql = require('mysql');
 var config = require('./config.js');
-var MYSQL = config.MYSQL;
 var Allegro = require('./libs/allegro');
 var Mojepanstwo = require('./libs/mojepanstwo');
-var Seller = require('./obj/Seller');
-var Product = require('./obj/Product');
-
-var con = mysql.createConnection({
-    host: MYSQL.host,
-    user: MYSQL.user,
-    password: MYSQL.password,
-    database: MYSQL.database
-});
-
-con.connect(function(err) {
-    if (err) throw err;
-});
+var Product = require('./models/Product');
+var Seller = require('./models/Seller');
 
 let keywords = config.keywords;
 
@@ -48,53 +35,41 @@ let keywords = config.keywords;
                                         .then((response) => {
                                             if (response.data.Dataobject.length) {
                                                 let krs_podmioty = response.data.Dataobject[0].data;
-                                                let seller = new Seller;
-
-                                                seller.address = krs_podmioty['krs_podmioty.adres'];
-                                                seller.registrationDate = krs_podmioty['krs_podmioty.data_rejestracji'];
-                                                seller.checkDate = krs_podmioty['krs_podmioty.data_sprawdzenia'];
-                                                seller.email = krs_podmioty['krs_podmioty.email'];
-                                                seller.krs = krs_podmioty['krs_podmioty.krs'];
-                                                seller.nip = krs_podmioty['krs_podmioty.nip'];
-                                                seller.regon = krs_podmioty['krs_podmioty.regon'];
-                                                seller.www = krs_podmioty['krs_podmioty.www'];
-                                                seller.mojepanstwoUrl = response.data.Dataobject[0].url;
-                                                seller.allegroUsername = 'allegro_username';
-
-                                                seller.save(con)
+                                                
+                                                Seller
+                                                    .create({
+                                                        address: krs_podmioty['krs_podmioty.adres'],
+                                                        registration_ate: krs_podmioty['krs_podmioty.data_rejestracji'],
+                                                        checkDate: krs_podmioty['krs_podmioty.data_sprawdzenia'],
+                                                        email: krs_podmioty['krs_podmioty.email'],
+                                                        krs: krs_podmioty['krs_podmioty.krs'],
+                                                        nip: krs_podmioty['krs_podmioty.nip'],
+                                                        regon: krs_podmioty['krs_podmioty.regon'],
+                                                        www: krs_podmioty['krs_podmioty.www'],
+                                                        mojepanstwo_url: response.data.Dataobject[0].url,
+                                                        allegro_username: 'allegro_username'
+                                                    })
                                                     .then((result) => {
-                                                        console.log('save seller');
-
-                                                        let product = new Product;
-
-                                                        product.productId = item.id;
-                                                        product.sellerId = result.insertId;
-                                                        product.images = JSON.stringify(item.images);
-                                                        product.url = item.url;
-                                                        product.name = item.name;
-
-                                                        product.save(con)
-                                                            .then((result) => {
-                                                                console.log('save product');
-                                                            })
-                                                            .catch((err) => {
-                                                                console.log(err);
-                                                            })
+                                                        Product.create({
+                                                            product_id: item.id,
+                                                            seller: result.id,
+                                                            images: JSON.stringify(item.images),
+                                                            url: item.url,
+                                                            name: item.name
+                                                        });
                                                     })
-                                                    .catch((err) => {
-                                                        console.log(err);
-                                                    })
+                                                ;
                                             }
                                         })
-                                        .catch((err) => {
+                                        .catch((e) => {
                                             console.log('Error in get data from KRS');
-                                            console.log(err);
+                                            console.log(e);
                                         })
                                 }
                             })
                             .catch((e) => {
                                 console.log('Error in get data seller from allegro');
-                                //console.log(e);
+                                console.log(e);
                             })
                         ;
                     }
@@ -102,7 +77,7 @@ let keywords = config.keywords;
             })
             .catch((e) => {
                 console.log('Error in get listing of products');
-                //console.log(e);
+                console.log(e);
             })
         ;
     }

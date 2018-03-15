@@ -8,7 +8,7 @@ const Product = sequelize.define('product', {
         primaryKey: true,
         autoIncrement: true
     },
-    seller_id: {
+    seller: {
         type: Sequelize.INTEGER,
         references: {
             model: Seller,
