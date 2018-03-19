@@ -19,3 +19,7 @@ node ./app.js
 ```
 
 Aplikacja będzie zbierać dane i zapisywac do bazy danych do momentu, aż zakończy poszukiwania lub zostanie przerwana
+
+###Wątpliwości
+- jak sensownie ograniczyć ilosc requestow aby nie zablokowalo aplikacji (glownie allegro)?
+- czy nip BIGINT, czy STRING (bo wyszukiwanie, przy dodawaniu)?
