@@ -28,7 +28,7 @@ module.exports = {
         let regexp = /<p>NIP:\s*([0-9\-]*)\s*<\/p>/i;
         let find = html.match(regexp);
 
-        if(find !== undefined)
+        if(find)
             return find[1].split('-').join('');
 
         return null;
