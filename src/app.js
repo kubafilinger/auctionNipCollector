@@ -9,7 +9,7 @@ let keywords = config.keywords;
 let pageNumber = 1;
 let numOfPages = 2;
 
-setInterval(() => {
+var getPageInterval = setInterval(() => {
     if (pageNumber < numOfPages) {
         Allegro.getProducts('iphone', pageNumber++)
             .then(function (response) {
@@ -18,13 +18,13 @@ setInterval(() => {
                 numOfPages = Math.ceil(countItems / pageSize);
 
                 let allItems = response.data.dataSources['listing-api-v3:allegro.listing:3.0'].data.items;
-                let sponsoredItems = allItems.sponsored;
-                let promotedItems = allItems.promoted;
-                let regularItems = allItems.regular;
-                let itemsArray = [sponsoredItems, promotedItems, regularItems];
+                let items = [], itemIndex = 0;
+                items = items.concat(allItems.promoted, allItems.regular, allItems.sponsored);
 
-                for(let j = 0; j < itemsArray.length; j++) {
-                    _.each(itemsArray[j], function (item) {
+                var getProductInterval = setInterval(function() {console.log(itemIndex);
+                    if(items.length > itemIndex + 1) {
+                        let item = items[itemIndex++];
+
                         Product
                             .findOne({
                                 where: {product_id: item.id}
@@ -101,8 +101,10 @@ setInterval(() => {
                                 }
                             })
                         ;
-                    })
-                }
+                    } else {
+                        clearInterval(getProductInterval);
+                    }
+                }, 50);
             })
             .catch((e) => {
                 console.log('Error in get listing of products');
@@ -114,6 +116,8 @@ setInterval(() => {
         zmiana keywords
         reset zmiennych
          */
+
+        clearInterval(getPageInterval);
     }
     console.log(pageNumber + ":" + numOfPages);
 }, 1000);
