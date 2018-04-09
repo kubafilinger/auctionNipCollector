@@ -22,8 +22,13 @@ class RequestLimiter {
 
             if(request) {
                 request.pending = true
-                request.request.apply(request.request, request.args)
-                    .then(request.callback)
+                request.request.call(request.request, request.args)
+                    .then((response) => {
+                        const id = request.id
+                        const index = this.requests.findIndex(request => request.id == id)
+                        this.requests.splice(index, 1)
+                        request.callback.call(request.callback, response)
+                    })
                     .catch(err => (
                         console.log(err)
                     ))
@@ -36,15 +41,6 @@ class RequestLimiter {
     stop() {
         clearInterval(this.interval)
     }
-
-    /*
-    todo:
-    - głowny setInterval
-    - tablica z requestami
-    - przekazanie collback
-
-    Uruchamiam metoda dopowiednia do ktorej w parametrze wysyłam ajaxa. Ona dodaje go na stos i request czeka na swoj czas wykonania. J
-     */
 }
 
 module.exports = RequestLimiter;

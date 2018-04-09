@@ -6,7 +6,7 @@ var Product = require('./models/Product');
 var Seller = require('./models/Seller');
 var RequestLimiter = require('./services/RequestLimiter');
 
-const requestLimiter = new RequestLimiter(100);
+const requestLimiter = new RequestLimiter(20);
 var numOfPages = 1000;
 
 _.each(config.keywords, (keyword) => {
