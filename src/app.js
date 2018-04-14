@@ -1,23 +1,24 @@
-var _ = require('underscore');
-var config = require('./config.js');
-var Allegro = require('./libs/allegro');
-var Mojepanstwo = require('./libs/mojepanstwo');
-var Product = require('./models/Product');
-var Seller = require('./models/Seller');
-var RequestLimiter = require('./services/RequestLimiter');
+const _ = require('underscore');
+const config = require('./config.js');
+const Allegro = require('./libs/allegro');
+const Mojepanstwo = require('./libs/mojepanstwo');
+const Product = require('./models/Product');
+const Seller = require('./models/Seller');
+const RequestLimiter = require('./services/RequestLimiter');
 
-const requestLimiter = new RequestLimiter(20);
-var numOfPages = 1000;
+const requestLimiter = new RequestLimiter(100);
+let numOfPages = 1;
+let keyword = 'iphone';
 
-_.each(config.keywords, (keyword) => {
+Allegro.getProducts(keyword).then((response) => {
+    let countItems = response.data.dataSources['listing-api-v3:allegro.listing:3.0'].metadata.Pageable.totalCount;
+    let pageSize = response.data.dataSources['listing-api-v3:allegro.listing:3.0'].metadata.Pageable.pageSize;
+    numOfPages = Math.ceil(countItems / pageSize);
+
     for(let pageNumber = 1; pageNumber < numOfPages; pageNumber++) {
         requestLimiter.push(Allegro.getProducts, [keyword, pageNumber], (response) => {
-            let countItems = response.data.dataSources['listing-api-v3:allegro.listing:3.0'].metadata.Pageable.totalCount;
-            let pageSize = response.data.dataSources['listing-api-v3:allegro.listing:3.0'].metadata.Pageable.pageSize;
-            //numOfPages = Math.ceil(countItems / pageSize);
-
             let allItems = response.data.dataSources['listing-api-v3:allegro.listing:3.0'].data.items;
-            let items = [], itemIndex = 0;
+            let items = [];
             items = items.concat(allItems.promoted, allItems.regular, allItems.sponsored);
 
             _.each(items, (item) => {
@@ -26,7 +27,7 @@ _.each(config.keywords, (keyword) => {
                         where: {product_id: item.id}
                     })
                     .then(product => {
-                        if(!product) {
+                        if(!product) {uniqueProducts++;
                             if (item.seller.company) {
                                 let sellerID = item.seller.id;
 
@@ -95,5 +96,4 @@ _.each(config.keywords, (keyword) => {
         })
         console.log(pageNumber + ":" + numOfPages);
     }
-
 })
