@@ -12,7 +12,7 @@ con.connect(function(err) {
     if (err) throw err;
     console.log("Connected!");
 
-    let seller = "CREATE TABLE IF NOT EXISTS `seller` (" +
+    let seller = "CREATE TABLE IF NOT EXISTS `sellers` (" +
             "id INT NOT NULL AUTO_INCREMENT," +
             "address VARCHAR(255) NULL DEFAULT NULL," +
             "registration_date DATETIME NULL DEFAULT NULL," +
@@ -23,8 +23,8 @@ con.connect(function(err) {
             "krs VARCHAR(255) NULL DEFAULT NULL," +
             "regon VARCHAR(255) NULL DEFAULT NULL," +
             "www VARCHAR(255) NULL DEFAULT NULL," +
-            "created_at DATETIME NULL DEFAULT CURRENT_TIMESTAMP," +
-            "updated_at DATETIME NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP," +
+            "createdAt DATETIME NULL DEFAULT CURRENT_TIMESTAMP," +
+            "updatedAt DATETIME NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP," +
             "mojepanstwo_url VARCHAR(255) NULL DEFAULT NULL," +
             "allegro_username VARCHAR(255) NULL DEFAULT NULL," +
             "nip VARCHAR(255) NULL DEFAULT NULL," +
@@ -32,13 +32,15 @@ con.connect(function(err) {
         ");"
     ;
 
-    let product = "CREATE TABLE IF NOT EXISTS `product` (" +
+    let product = "CREATE TABLE IF NOT EXISTS `products` (" +
             "id INT NOT NULL AUTO_INCREMENT," +
             "product_id BIGINT NULL DEFAULT NULL," +
-            "seller_id INT NULL DEFAULT NULL," +
+            "seller INT NULL DEFAULT NULL," +
             "images TEXT NULL DEFAULT NULL," +
             "url TEXT NULL DEFAULT NULL," +
             "name TEXT NULL DEFAULT NULL," +
+            "createdAt DATETIME NULL DEFAULT CURRENT_TIMESTAMP," +
+            "updatedAt DATETIME NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP," +
             "PRIMARY KEY (`id`)" +
         ");"
     ;
@@ -52,4 +54,6 @@ con.connect(function(err) {
         if (err) throw err;
         console.log("Table created");
     });
+
+    con.end();
 });

@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../connection');
 
-const Seller = sequelize.define('seller', {
+const Seller = sequelize.define('sellers', {
     id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
