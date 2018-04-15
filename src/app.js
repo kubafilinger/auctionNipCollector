@@ -6,7 +6,7 @@ const Product = require('./models/Product');
 const Seller = require('./models/Seller');
 const RequestLimiter = require('./services/RequestLimiter');
 
-const requestLimiter = new RequestLimiter(100);
+const requestLimiter = new RequestLimiter(50);
 let numOfPages = 1;
 let keyword = 'iphone';
 
@@ -27,7 +27,7 @@ Allegro.getProducts(keyword).then((response) => {
                         where: {product_id: item.id}
                     })
                     .then(product => {
-                        if(!product) {uniqueProducts++;
+                        if(!product) {
                             if (item.seller.company) {
                                 let sellerID = item.seller.id;
 
@@ -35,25 +35,25 @@ Allegro.getProducts(keyword).then((response) => {
                                     let nip = Allegro.findNip(response.data);
 
                                     if (nip) {
-                                        Mojepanstwo.getCompanyData(nip)
-                                            .then((response) => {
-                                                if (response.data.Dataobject.length) {
-                                                    let krs_podmioty = response.data.Dataobject[0].data;
+                                        Seller
+                                            .findOne({
+                                                where: {nip: nip}
+                                            })
+                                            .then(seller => {
+                                                if(seller) {
+                                                    Product.create({
+                                                        product_id: item.id,
+                                                        seller: seller.id,
+                                                        images: JSON.stringify(item.images),
+                                                        url: item.url,
+                                                        name: item.name
+                                                    });
+                                                } else {
+                                                    Mojepanstwo.getCompanyData(nip)
+                                                        .then((response) => {
+                                                            if (response.data.Dataobject.length) {
+                                                                let krs_podmioty = response.data.Dataobject[0].data;
 
-                                                    Seller
-                                                        .findOne({
-                                                            where: {nip: nip}
-                                                        })
-                                                        .then(seller => {
-                                                            if(seller) {
-                                                                Product.create({
-                                                                    product_id: item.id,
-                                                                    seller: seller.id,
-                                                                    images: JSON.stringify(item.images),
-                                                                    url: item.url,
-                                                                    name: item.name
-                                                                });
-                                                            } else {
                                                                 Seller
                                                                     .create({
                                                                         address: krs_podmioty['krs_podmioty.adres'],
@@ -77,15 +77,37 @@ Allegro.getProducts(keyword).then((response) => {
                                                                         });
                                                                     })
                                                                 ;
+                                                            } else {
+                                                                /*
+                                                                TODO: seller address from allegro endpoint
+                                                                TODO: save allegro username for seller
+                                                                 */
+
+                                                                Seller
+                                                                    .create({
+                                                                        nip: nip,
+                                                                        allegro_username: 'allegro_username'
+                                                                    })
+                                                                    .then((result) => {
+                                                                        Product.create({
+                                                                            product_id: item.id,
+                                                                            seller: result.id,
+                                                                            images: JSON.stringify(item.images),
+                                                                            url: item.url,
+                                                                            name: item.name
+                                                                        });
+                                                                    })
+                                                                ;
                                                             }
+                                                        })
+                                                        .catch((e) => {
+                                                            console.log('Error in get data from KRS');
+                                                            console.log(e);
                                                         })
                                                     ;
                                                 }
                                             })
-                                            .catch((e) => {
-                                                console.log('Error in get data from KRS');
-                                                console.log(e);
-                                            })
+                                        ;
                                     }
                                 })
                             }
