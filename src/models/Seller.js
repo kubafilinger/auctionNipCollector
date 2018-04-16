@@ -48,9 +48,8 @@ const Seller = sequelize.define('sellers', {
         defaultValue: null
     },
     nip: {
-        type: Sequelize.STRING,
-        allowNull: true,
-        defaultValue: null
+        type: Sequelize.BIGINT,
+        unique: true
     },
     company: {
         type: Sequelize.STRING,
