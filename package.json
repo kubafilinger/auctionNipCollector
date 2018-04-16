@@ -5,6 +5,7 @@
   "main": "webpack.config.js",
   "dependencies": {
     "axios": "^0.18.0",
+    "fs": "0.0.1-security",
     "mysql": "^2.15.0",
     "mysql2": "^1.5.2",
     "sequelize": "^4.36.1",
