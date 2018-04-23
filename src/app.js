@@ -8,7 +8,7 @@ const RequestLimiter = require('./services/RequestLimiter');
 
 const requestLimiter = new RequestLimiter(50);
 let numOfPages = 1;
-let keyword = 'iphone';
+let keyword = process.argv[2];
 
 Allegro.getProducts(keyword).then((response) => {
     let countItems = response.data.dataSources['listing-api-v3:allegro.listing:3.0'].metadata.Pageable.totalCount;
