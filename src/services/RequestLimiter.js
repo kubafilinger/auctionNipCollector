@@ -29,11 +29,6 @@ class RequestLimiter {
                         this.requests.splice(index, 1)
                         request.callback.call(request.callback, response)
                     })
-                    .catch(err => (
-                        console.log(err)
-                    ))
-
-                console.log("send " + request.id + "; all: " + this.id);
             }
         }, this.delay)
     }

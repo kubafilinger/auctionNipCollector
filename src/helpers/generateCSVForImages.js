@@ -15,7 +15,7 @@ Product.findAll().then(products => {
             })
         })
     })
-console.log(data)
+
     fs.writeFile('imagesForProducts.csv', dataToCSV(data), function (err, file) {
         if (err)
             throw err
