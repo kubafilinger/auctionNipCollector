@@ -7,10 +7,18 @@ const Seller = require('./models/Seller');
 const RequestLimiter = require('./services/RequestLimiter');
 const sequelize = require('./connection');
 
-const requestLimiter = new RequestLimiter(50)
 let numOfPages = 1
 let keyword = process.argv[2]
 let countSQLQueries = 0;
+
+const requestLimiter = new RequestLimiter(50, function() {
+    setInterval(() => {
+        if(countSQLQueries == 0) {
+            sequelize.close();
+            process.exit(0);
+        }
+    }, 500)
+})
 
 Product.beforeCreate((obj, options) => {
     countSQLQueries++;
@@ -34,70 +42,22 @@ Seller.beforeSave((obj, options) => {
 
 Product.afterCreate((obj, options) => {
     countSQLQueries--;
-
-    if(countSQLQueries == 0) {
-        setTimeout(() => {
-            if(countSQLQueries == 0) {
-                sequelize.close()
-            }
-        }, 1000)
-    }
 })
 Product.afterUpdate((obj, options) => {
     countSQLQueries--;
-
-    if(countSQLQueries == 0) {
-        setTimeout(() => {
-            if(countSQLQueries == 0) {
-                sequelize.close()
-            }
-        }, 1000)
-    }
 })
 Product.afterSave((obj, options) => {
     countSQLQueries--;
-
-    if(countSQLQueries == 0) {
-        setTimeout(() => {
-            if(countSQLQueries == 0) {
-                sequelize.close()
-            }
-        }, 1000)
-    }
 })
 
 Seller.afterCreate((obj, options) => {
     countSQLQueries--;
-
-    if(countSQLQueries == 0) {
-        setTimeout(() => {
-            if(countSQLQueries == 0) {
-                sequelize.close()
-            }
-        }, 1000)
-    }
 })
 Seller.afterUpdate((obj, options) => {
     countSQLQueries--;
-
-    if(countSQLQueries == 0) {
-        setTimeout(() => {
-            if(countSQLQueries == 0) {
-                sequelize.close()
-            }
-        }, 1000)
-    }
 })
 Seller.afterSave((obj, options) => {
     countSQLQueries--;
-
-    if(countSQLQueries == 0) {
-        setTimeout(() => {
-            if(countSQLQueries == 0) {
-                sequelize.close()
-            }
-        }, 1000)
-    }
 })
 
 Allegro.getProducts(keyword).then((response) => {
