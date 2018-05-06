@@ -9,55 +9,9 @@ const sequelize = require('./connection');
 
 let numOfPages = 1
 let keyword = process.argv[2]
-let countSQLQueries = 0;
 
 const requestLimiter = new RequestLimiter(50, function() {
-    setInterval(() => {
-        if(countSQLQueries == 0) {
-            sequelize.close();
-            process.exit(0);
-        }
-    }, 500)
-})
 
-Product.beforeCreate((obj, options) => {
-    countSQLQueries++;
-})
-Product.beforeUpdate((obj, options) => {
-    countSQLQueries++;
-})
-Product.beforeSave((obj, options) => {
-    countSQLQueries++;
-})
-
-Seller.beforeCreate((obj, options) => {
-    countSQLQueries++;
-})
-Seller.beforeUpdate((obj, options) => {
-    countSQLQueries++;
-})
-Seller.beforeSave((obj, options) => {
-    countSQLQueries++;
-})
-
-Product.afterCreate((obj, options) => {
-    countSQLQueries--;
-})
-Product.afterUpdate((obj, options) => {
-    countSQLQueries--;
-})
-Product.afterSave((obj, options) => {
-    countSQLQueries--;
-})
-
-Seller.afterCreate((obj, options) => {
-    countSQLQueries--;
-})
-Seller.afterUpdate((obj, options) => {
-    countSQLQueries--;
-})
-Seller.afterSave((obj, options) => {
-    countSQLQueries--;
 })
 
 Allegro.getProducts(keyword).then((response) => {

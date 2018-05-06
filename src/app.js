@@ -1,10 +1,22 @@
-const { execFile } = require('child_process');
+const { execFile } = require('child_process')
 
-let keywords = process.argv.slice(2);
+let keywords = process.argv.slice(2)
+let index = 0
 
-execFile('node', ['./src/collector.js', keywords[0]], (error, stdout, stderr) => {
-    if (error) {
-        throw error;
-    }
-    console.log(stdout);
-});
+function main() {
+    console.log('Searching products for keyword: ' + keywords[index])
+
+    execFile('node', ['./src/collector.js', keywords[index++]], (error, stdout, stderr) => {
+        if (error) {
+            throw error
+        }
+
+        console.log(stdout)
+
+        if(index < keywords.length) {
+            main()
+        }
+    })
+}
+
+main()
