@@ -9,9 +9,13 @@ const sequelize = require('./connection');
 
 let numOfPages = 1
 let keyword = process.argv[2]
+let countProducts = 0
+let canExit = false
 
-const requestLimiter = new RequestLimiter(50, function() {
+const requestLimiter = new RequestLimiter(50, function() {})
 
+Product.afterSave((obj, options) => {
+    canExit = true
 })
 
 Allegro.getProducts(keyword).then((response) => {
@@ -19,7 +23,9 @@ Allegro.getProducts(keyword).then((response) => {
     let pageSize = response.data.dataSources['listing-api-v3:allegro.listing:3.0'].metadata.Pageable.pageSize;
     numOfPages = Math.ceil(countItems / pageSize);
 
-    for(let pageNumber = 1; pageNumber < numOfPages; pageNumber++) {
+    if(numOfPages == 0) canExit = true
+
+    for(let pageNumber = 1; pageNumber <= numOfPages; pageNumber++) {
         requestLimiter.push(Allegro.getProducts, [keyword, pageNumber], (response) => {
             let allItems = response.data.dataSources['listing-api-v3:allegro.listing:3.0'].data.items;
             let items = [];
@@ -33,10 +39,10 @@ Allegro.getProducts(keyword).then((response) => {
                     .then(product => {
                         if(!product) {
                             if (item.seller.company) {
-                                let sellerID = item.seller.id;
+                                let sellerID = item.seller.id
 
                                 requestLimiter.push(Allegro.getSellerInfo, [sellerID], response => {
-                                    let nip = Allegro.findNip(response.data);
+                                    let nip = Allegro.findNip(response.data)
 
                                     if (nip) {
                                         Seller
@@ -51,7 +57,7 @@ Allegro.getProducts(keyword).then((response) => {
                                                         images: JSON.stringify(item.images),
                                                         url: item.url,
                                                         name: item.name
-                                                    });
+                                                    })
                                                 } else {
                                                     Mojepanstwo.getCompanyData(nip)
                                                         .then((response) => {
@@ -67,7 +73,7 @@ Allegro.getProducts(keyword).then((response) => {
                                                                             images: JSON.stringify(item.images),
                                                                             url: item.url,
                                                                             name: item.name
-                                                                        });
+                                                                        })
                                                                     } else {
                                                                         if (response.data.Dataobject.length) {
                                                                             let krs_podmioty = response.data.Dataobject[0].data;
@@ -139,3 +145,17 @@ Allegro.getProducts(keyword).then((response) => {
         })
     }
 })
+
+setTimeout(() => {
+    setInterval(() => {
+        Product
+            .findAndCountAll()
+            .then((result) => {
+                if (countProducts == result.count) {
+                    sequelize.close()
+                    process.exit(0)
+                } else
+                    countProducts = result.count
+            })
+    }, 5000)
+}, 90000)
