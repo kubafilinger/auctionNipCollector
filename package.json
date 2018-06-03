@@ -5,6 +5,8 @@
   "main": "webpack.config.js",
   "dependencies": {
     "axios": "^0.18.0",
+    "bluebird": "^3.5.1",
+    "child_process": "^1.0.2",
     "fs": "0.0.1-security",
     "mysql": "^2.15.0",
     "mysql2": "^1.5.2",

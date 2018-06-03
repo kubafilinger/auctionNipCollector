@@ -7,11 +7,12 @@ const sequelize = new Sequelize(MYSQL.database, MYSQL.user, MYSQL.password, {
     dialect: 'mysql',
     operatorsAliases: false,
     pool: {
-        max: 5,
+        max: 50,
         min: 0,
-        acquire: 30000,
+        acquire: 3000000,
         idle: 10000
     },
+    logging: false
 });
 
 sequelize

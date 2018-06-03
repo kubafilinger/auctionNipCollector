@@ -7,7 +7,7 @@ module.exports = {
      */
     getProducts: function(keyword = '', page = 1) {
         return axios
-            .get('https://allegro.pl/kategoria/telefony-i-akcesoria?offerTypeBuyNow=1&vat_invoice=1&string=' + keyword + '&p=' + page, {
+            .get('https://allegro.pl/listing?offerTypeBuyNow=1&vat_invoice=1&string=' + keyword + '&p=' + page, {
                 headers: {'Accept': 'application/vnd.opbox-web.v2+json'}
             })
     },
